@@ -36,7 +36,12 @@ image: templates
 format:
 	mix format
 
-mix: all
+map:
+	mix xref graph --format dot
+	dot -Tpng xref_graph.dot -o xref_graph.png
+	eog xref_graph.png
+
+mix: compile
 	iex -S mix
 
 proper: distclean compile test
@@ -57,7 +62,7 @@ templates:
 	envsubst < templates/Dockerfile > Dockerfile
 	envsubst < templates/testsuite.yaml > .github/workflows/testsuite.yaml
 
-test:
+test: deps
 	mix format --check-formatted
 	mix dialyzer
 	mix test
