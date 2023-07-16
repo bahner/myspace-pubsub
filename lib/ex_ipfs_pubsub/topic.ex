@@ -174,9 +174,9 @@ defmodule ExIpfsPubsub.Topic do
     end
   end
 
-  def handle_info({:gun_ws, conn_pid, stream_ref, :ping}, state) do
-    if conn_pid == state.conn_pid and stream_ref == state.stream_ref do
-      :ok = :gun.ws_send(conn_pid, stream_ref, :pong)
+  def handle_info({:gun_ws, conn_pid, _, :ping}, state) do
+    if conn_pid == state.conn_pid do
+      :ok = :gun.ws_send(conn_pid, :pong)
       {:noreply, state}
     else
       Logger.error("Unexpected :gun_ws message")
