@@ -2,67 +2,65 @@ defmodule ExIpfsPubsub do
   @moduledoc """
   ExIpfsPubsub is where the Pubsub commands of the IPFS API reside.
   """
-  import ExIpfs.Api
-  import ExIpfs.Utils
-  alias ExIpfs.Multibase
+  # alias ExIpfs.Multibase
   alias ExIpfsPubsub.Topic
 
   require Logger
 
-  @spec ls :: {:error, any} | {:ok, list}
-  @doc """
-  List the topics you are currently subscribed to.
+  # @spec ls :: {:error, any} | {:ok, list}
+  # @doc """
+  # List the topics you are currently subscribed to.
 
-  https://docs.ipfs.io/reference/http/api/#api-v0-pubsub-ls
-  """
-  # @spec ls :: {:ok, ExIpfs.strings()} | ExIpfs.Api.error_response()
-  def ls do
-    post_query("/pubsub/ls")
-    |> decode_strings()
-    |> Map.get("Strings")
-    |> okify()
-  end
+  # https://docs.ipfs.io/reference/http/api/#api-v0-pubsub-ls
+  # """
+  # # @spec ls :: {:ok, ExIpfs.strings()} | ExIpfs.Api.error_response()
+  # def ls do
+  #   post_query("/pubsub/ls")
+  #   |> decode_strings()
+  #   |> Map.get("Strings")
+  #   |> okify()
+  # end
 
-  @doc """
-  List the peers you are currently connected to.
+  # @doc """
+  # List the peers you are currently connected to.
 
-  https://docs.ipfs.io/reference/http/api/#api-v0-pubsub-peers
+  # https://docs.ipfs.io/reference/http/api/#api-v0-pubsub-peers
 
-  ## Parameters
-    `topic` - The topic to list peers for.
-  """
-  @spec peers(binary) :: {:ok, any} | ExIpfs.Api.error_response()
-  def peers(topic) do
-    base64topic = Multibase.encode!(topic, [])
+  # ## Parameters
+  #   `topic` - The topic to list peers for.
+  # """
+  # @spec peers(binary) :: {:ok, any} | ExIpfs.Api.error_response()
+  # def peers(topic) do
+  #   base64topic = Multibase.encode!(topic, [])
 
-    post_query("/pubsub/peers?arg=#{base64topic}")
-    |> Map.get("Strings")
-    |> okify()
-  end
+  #   post_query("/pubsub/peers?arg=#{base64topic}")
+  #   |> Map.get("Strings")
+  #   |> okify()
+  # end
 
-  @doc """
-  Publish a message to a topic.
+  # @doc """
+  # Publish a message to a topic.
 
-  https://docs.ipfs.io/reference/http/api/#api-v0-pubsub-pub
+  # https://docs.ipfs.io/reference/http/api/#api-v0-pubsub-pub
 
-  ## Parameters
-  ```
-    `topic` - The topic to publish to.
-    `data` - The data to publish.
-  ```
+  # ## Parameters
+  # ```
+  #   `topic` - The topic to publish to.
+  #   `data` - The data to publish.
+  # ```
 
-  ## Usage
-  ```
-  ExIpfsPubsub.sub("mymessage", "mytopic")
-  ```
+  # ## Usage
+  # ```
+  # ExIpfsPubsub.sub("mymessage", "mytopic")
+  # ```
 
-  """
-  @spec pub(binary, binary) :: {:ok, any} | ExIpfs.Api.error_response()
-  def pub(data, topic) do
-    multipart_content(data, "data")
-    |> post_multipart("/pubsub/pub?arg=" <> Multibase.encode!(topic, []))
-    |> okify()
-  end
+  # """
+  # @spec pub(binary, binary) :: {:ok, any} | ExIpfs.Api.error_response()
+  # def pub(data, topic) do
+  #   multipart_content(data, "data")
+  #   |> post_multipart("/pubsub/pub?arg=" <> Multibase.encode!(topic, []))
+  #   |> okify()
+  # end
 
   @doc """
   Subscribe to messages on a topic and listen for them.
@@ -94,7 +92,7 @@ defmodule ExIpfsPubsub do
         {:ok, pid}
 
       {:error, {:already_started, handler}} ->
-        Logger.info("Subscribing to topic: #{topic.base64url_topic}")
+        Logger.info("Subscribing to topic: #{topic.topic}")
         ExIpfsPubsub.Topic.subscribe(pid, topic.topic)
         {:ok, handler}
     end
@@ -115,14 +113,14 @@ defmodule ExIpfsPubsub do
     end
   end
 
-  @spec decode_strings({:error, any} | map | list) :: {:error, any} | map | list
-  defp decode_strings({:error, data}), do: {:error, data}
+  # @spec decode_strings({:error, any} | map | list) :: {:error, any} | map | list
+  # defp decode_strings({:error, data}), do: {:error, data}
 
-  defp decode_strings(strings) when is_map(strings) do
-    strings = Map.get(strings, "Strings", [])
-    decoded_strings = Enum.map(strings, &Multibase.decode!/1)
-    %{"Strings" => decoded_strings}
-  end
+  # defp decode_strings(strings) when is_map(strings) do
+  #   strings = Map.get(strings, "Strings", [])
+  #   decoded_strings = Enum.map(strings, &Multibase.decode!/1)
+  #   %{"Strings" => decoded_strings}
+  # end
 
-  defp decode_strings(list), do: Enum.map(list, &decode_strings/1)
+  # defp decode_strings(list), do: Enum.map(list, &decode_strings/1)
 end
