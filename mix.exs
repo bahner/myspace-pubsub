@@ -34,6 +34,8 @@ defmodule ExIpfsPubsub.Mixfile do
   defp deps do
     [
       {:ex_ipfs, "~> 0.1.4"},
+      {:gun, "~> 1.3"},
+      {:tesla, "~> 1.4"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.2", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.29", only: :dev, runtime: false},

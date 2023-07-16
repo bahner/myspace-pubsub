@@ -13,7 +13,7 @@ defmodule ExIpfsPubsub.Topic do
   @registry :ex_ipfs_pubsub_registry
 
   @enforce_keys [:base64url_topic, :handler, :subscribers, :topic]
-  defstruct base64url_topic: nil, handler: nil, subscribers: MapSet.new(), topic: nil
+  defstruct base64url_topic: nil, handler: nil, subscribers: MapSet.new(), topic: nil, conn_pid: nil, stream_ref: nil
 
   @type t :: %__MODULE__{
           base64url_topic: binary | nil,
@@ -55,8 +55,10 @@ defmodule ExIpfsPubsub.Topic do
     # Update subscribers registry.
     Subscribers.add_topic(state.topic, state.subscribers)
 
-    url = "#{@api_url}/pubsub/sub?arg=#{topic.base64url_topic}"
-    ApiStreamingClient.new(self(), url)
+    url = URI.parse("#{@api_url}/#{topic.base64url_topic}")
+    {:ok, conn_pid} = :gun.open(to_charlist(url.host), url.port)
+    stream_ref = :gun.ws_upgrade(conn_pid, to_charlist(url.path), [])
+    state = %__MODULE__{state | conn_pid: conn_pid, stream_ref: stream_ref}
     {:ok, state}
   end
 
@@ -146,36 +148,83 @@ defmodule ExIpfsPubsub.Topic do
     {:noreply, state}
   end
 
-  def handle_info({:hackney_response, _ref, data}, state) do
-    case data do
-      {:status, 200, _} ->
-        Logger.info("Subscribed to #{state.topic}")
-        {:noreply, state}
 
-      {:headers, headers} ->
-        Logger.info("Headers: #{inspect(headers)}")
-        {:noreply, state}
-
-      {:data, data} ->
-        Logger.info("Data: #{inspect(data)}")
-        {:noreply, state}
-
-      {:done, _} ->
-        Logger.info("Done")
-        {:noreply, state}
-
-      data ->
-        Logger.info("Received data: #{inspect(data)}")
-
-        state.subscribers
-        |> MapSet.to_list()
-        |> Enum.each(&send(&1, parse_pubsub_message(data)))
-
-        {:noreply, state}
+  def handle_info({:gun_upgrade, conn_pid, stream_ref, ["websocket"], _headers}, state) do
+    if conn_pid == state.conn_pid and stream_ref == state.stream_ref do
+      Logger.info("WebSocket upgrade successful, subscribed to #{state.topic}")
+      {:noreply, state}
+    else
+      Logger.error("Unexpected :gun_upgrade message")
+      {:stop, :unexpected_message, state}
     end
-
-    {:noreply, state}
   end
+
+  def handle_info({:gun_ws, conn_pid, stream_ref, {:text, msg}}, state) do
+    if conn_pid == state.conn_pid and stream_ref == state.stream_ref do
+      Logger.info("Received message: #{msg}")
+
+      state.subscribers
+      |> MapSet.to_list()
+      |> Enum.each(&send(&1, parse_pubsub_message(msg)))
+
+      {:noreply, state}
+    else
+      Logger.error("Unexpected :gun_ws message")
+      {:stop, :unexpected_message, state}
+    end
+  end
+
+  def handle_info({:gun_ws, conn_pid, stream_ref, :ping}, state) do
+    if conn_pid == state.conn_pid and stream_ref == state.stream_ref do
+      :ok = :gun.ws_send(conn_pid, stream_ref, :pong)
+      {:noreply, state}
+    else
+      Logger.error("Unexpected :gun_ws message")
+      {:stop, :unexpected_message, state}
+    end
+  end
+
+  def handle_info({:gun_close, conn_pid, _stream_ref, _reason}, state) do
+    if conn_pid == state.conn_pid do
+      Logger.info("WebSocket connection closed")
+      # You might want to handle the reconnect logic here
+      {:stop, :connection_closed, state}
+    else
+      {:noreply, state}
+    end
+  end
+
+
+  # def handle_info({:hackney_response, _ref, data}, state) do
+  #   case data do
+  #     {:status, 200, _} ->
+  #       Logger.info("Subscribed to #{state.topic}")
+  #       {:noreply, state}
+
+  #     {:headers, headers} ->
+  #       Logger.info("Headers: #{inspect(headers)}")
+  #       {:noreply, state}
+
+  #     {:data, data} ->
+  #       Logger.info("Data: #{inspect(data)}")
+  #       {:noreply, state}
+
+  #     {:done, _} ->
+  #       Logger.info("Done")
+  #       {:noreply, state}
+
+  #     data ->
+  #       Logger.info("Received data: #{inspect(data)}")
+
+  #       state.subscribers
+  #       |> MapSet.to_list()
+  #       |> Enum.each(&send(&1, parse_pubsub_message(data)))
+
+  #       {:noreply, state}
+  #   end
+
+  #   {:noreply, state}
+  # end
 
   defp via_tuple(topic) when is_binary(topic) do
     Logger.debug("Registering via tuple for #{topic}")
