@@ -225,7 +225,22 @@ end
   end
 
   defp parse_pubsub_message(data) do
-    message = Message.new(data)
-    {:ex_ipfs_pubsub_message, Multibase.decode!(message.data)}
+    if is_json?(data) do
+      message = Message.new(data)
+      if message.is_a?(Message) do
+        {:ex_ipfs_pubsub_message, Multibase.decode!(message.data)}
+      else
+        {:raw_pubsub_message, data}
+      end
+    else
+      {:raw_pubsub_message, data}
+    end
+  end
+
+  defp is_json?(data) do
+    case Jason.decode(data) do
+      {:ok, _} -> true
+      {:error, _} -> false
+    end
   end
 end
