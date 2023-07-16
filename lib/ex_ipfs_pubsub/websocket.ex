@@ -10,8 +10,8 @@ defmodule ExIpfsPubsub.Websocket do
   defstruct conn_pid: nil, stream_ref: nil
 
   @type t :: %__MODULE__{
-          conn_pid: pid,
-          stream_ref: integer
+          conn_pid: pid(),
+          stream_ref: reference()
         }
 
   @spec new!(URI) :: t()

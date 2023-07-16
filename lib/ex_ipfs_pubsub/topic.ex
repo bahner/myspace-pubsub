@@ -9,7 +9,7 @@ defmodule ExIpfsPubsub.Topic do
   alias ExIpfsPubsub.Subscribers
   alias ExIpfsPubsub.Websocket
 
-  @api_url Application.compile_env(:ex_ipfs, :api_url, "http://127.0.0.1:5001/api/v0")
+  @api_url Application.compile_env(:ex_ipfs_pubsub, :api_url, "ws://127.0.0.1:5002/topic")
   @registry :ex_ipfs_pubsub_registry
 
   @enforce_keys [:base64url_topic, :handler, :subscribers, :topic]
@@ -196,10 +196,10 @@ defmodule ExIpfsPubsub.Topic do
   # For example, for a 405 status code (Method Not Allowed), you might want to log an error and terminate the GenServer.
   # For other status codes, you might want to do something else.
   case status_code do
-    # 405 ->
-    #   Logger.error("Received 405 Method Not Allowed in :gun_response")
-    #   # {:stop, {:http_error, status_code}, state}
-    #   {:noreply, state}
+    405 ->
+      Logger.error("Received 405 Method Not Allowed in :gun_response")
+      # {:stop, {:http_error, status_code}, state}
+      {:noreply, state}
 
     _ ->
       # Handle other status codes if needed.
