@@ -2,9 +2,7 @@ defmodule ExIpfsPubsub do
   @moduledoc """
   ExIpfsPubsub is where the Pubsub commands of the IPFS API reside.
   """
-  import ExIpfs.Api
-  import ExIpfs.Utils
-  alias ExIpfs.Multibase
+  # alias ExIpfs.Multibase
   alias ExIpfsPubsub.Topic
 
   require Logger
@@ -40,29 +38,29 @@ defmodule ExIpfsPubsub do
   #   |> okify()
   # end
 
-  @doc """
-  Publish a message to a topic.
+  # @doc """
+  # Publish a message to a topic.
 
-  https://docs.ipfs.io/reference/http/api/#api-v0-pubsub-pub
+  # https://docs.ipfs.io/reference/http/api/#api-v0-pubsub-pub
 
-  ## Parameters
-  ```
-    `topic` - The topic to publish to.
-    `data` - The data to publish.
-  ```
+  # ## Parameters
+  # ```
+  #   `topic` - The topic to publish to.
+  #   `data` - The data to publish.
+  # ```
 
-  ## Usage
-  ```
-  ExIpfsPubsub.sub("mymessage", "mytopic")
-  ```
+  # ## Usage
+  # ```
+  # ExIpfsPubsub.sub("mymessage", "mytopic")
+  # ```
 
-  """
-  @spec pub(binary, binary) :: {:ok, any} | ExIpfs.Api.error_response()
-  def pub(data, topic) do
-    multipart_content(data, "data")
-    |> post_multipart("/pubsub/pub?arg=" <> Multibase.encode!(topic, []))
-    |> okify()
-  end
+  # """
+  # @spec pub(binary, binary) :: {:ok, any} | ExIpfs.Api.error_response()
+  # def pub(data, topic) do
+  #   multipart_content(data, "data")
+  #   |> post_multipart("/pubsub/pub?arg=" <> Multibase.encode!(topic, []))
+  #   |> okify()
+  # end
 
   @doc """
   Subscribe to messages on a topic and listen for them.
