@@ -2,65 +2,64 @@ defmodule ExIpfsPubsub do
   @moduledoc """
   ExIpfsPubsub is where the Pubsub commands of the IPFS API reside.
   """
-  # alias ExIpfs.Multibase
   alias ExIpfsPubsub.Topic
+  use Tesla
+
+  @api_url Application.compile_env(:ex_ipfs_pubsub, :api_url, "http://127.0.0.1:5002/api/v0")
+
+  plug Tesla.Middleware.BaseUrl, @api_url
+  #plug Tesla.Middleware.Headers, [{"Content-Type", "application/json"}]
+  plug Tesla.Middleware.JSON
 
   require Logger
 
-  # @spec ls :: {:error, any} | {:ok, list}
-  # @doc """
-  # List the topics you are currently subscribed to.
+  @doc """
+  Lists the topics that the node is subscribed to.
+  """
 
-  # https://docs.ipfs.io/reference/http/api/#api-v0-pubsub-ls
-  # """
-  # # @spec ls :: {:ok, ExIpfs.strings()} | ExIpfs.Api.error_response()
-  # def ls do
-  #   post_query("/pubsub/ls")
-  #   |> decode_strings()
-  #   |> Map.get("Strings")
-  #   |> okify()
-  # end
+  @spec ls() :: {:ok, list(binary)} | {:error, any | :invalid_response}
+  def ls() do
+    case get("/topics") do
+      {:ok, %Tesla.Env{body: body}} when is_map(body) ->
+        %{"topics" =>  topics} = body
+        {:ok, topics}
+      {:ok, _} ->
+        {:error, :invalid_response}
+      {:error, err} ->
+        {:error, err}
+    end
+  end
 
-  # @doc """
-  # List the peers you are currently connected to.
+  @doc """
+  Lists the topics that the node is subscribed to.
 
-  # https://docs.ipfs.io/reference/http/api/#api-v0-pubsub-peers
+  ## Usage
+  ls!()
 
-  # ## Parameters
-  #   `topic` - The topic to list peers for.
-  # """
-  # @spec peers(binary) :: {:ok, any} | ExIpfs.Api.error_response()
-  # def peers(topic) do
-  #   base64topic = Multibase.encode!(topic, [])
+  """
+  @spec ls!() :: list(binary)
+  def ls!() do
+    {:ok, %Tesla.Env{body: body}} = get("/topics")
 
-  #   post_query("/pubsub/peers?arg=#{base64topic}")
-  #   |> Map.get("Strings")
-  #   |> okify()
-  # end
+    %{"topics" =>  topics} = body
+    topics
+  end
 
-  # @doc """
-  # Publish a message to a topic.
+  @doc """
+  Checks if a topic exists in the list of topics that the node is subscribed to.
+  """
+  @spec exists?(any) :: boolean
+  def exists?(topic) do
 
-  # https://docs.ipfs.io/reference/http/api/#api-v0-pubsub-pub
+    {:ok , topics} = ls()
 
-  # ## Parameters
-  # ```
-  #   `topic` - The topic to publish to.
-  #   `data` - The data to publish.
-  # ```
+    if topic in topics do
+      true
+    else
+      false
+    end
 
-  # ## Usage
-  # ```
-  # ExIpfsPubsub.sub("mymessage", "mytopic")
-  # ```
-
-  # """
-  # @spec pub(binary, binary) :: {:ok, any} | ExIpfs.Api.error_response()
-  # def pub(data, topic) do
-  #   multipart_content(data, "data")
-  #   |> post_multipart("/pubsub/pub?arg=" <> Multibase.encode!(topic, []))
-  #   |> okify()
-  # end
+  end
 
   @doc """
   Subscribe to messages on a topic and listen for them.
@@ -97,6 +96,13 @@ defmodule ExIpfsPubsub do
         {:ok, handler}
     end
   end
+
+  # FIXME: This is not working yet.
+  # @spec publish(binary, binary) :: :ok
+  # def publish(topic, message) when is_binary(topic) and is_binary(message) do
+  #   Logger.info("Publishing message to topic: #{topic}")
+  #   ExIpfsPubsub.Topic.publish(topic, message)
+  # end
 
   @doc """
   Get next message from the Pubsub Topic in your inbox or wait for one to arrive.
