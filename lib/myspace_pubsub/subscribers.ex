@@ -1,4 +1,4 @@
-defmodule ExIpfsPubsub.Subscribers do
+defmodule MyspacePubsub.Subscribers do
   @moduledoc false
 
   # This module is a registry for all topics.
@@ -56,6 +56,7 @@ defmodule ExIpfsPubsub.Subscribers do
     |> MapSet.new()
   end
 
+  @spec get_all :: map
   def get_all() do
     Agent.get(__MODULE__, & &1)
   end

@@ -2,3 +2,5 @@ TODO
 ===
 
 FIX Supervisor. It fails to start topic genserver, before it reaches the actual invocation of start_link
+ADD signature checking on messages.
+FIX dialyzer type problems in sub

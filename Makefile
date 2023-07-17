@@ -18,8 +18,7 @@ compile:
 deps:
 	mix deps.get
 
-docker:
-	mkdir -p .docker/ipfs_staging .docker_data/ipfs_data
+services:
 	docker-compose up -d
 
 docs:
@@ -50,28 +49,20 @@ push: all commited test
 	git pull
 	git push
 
-publish-image: image
-	docker push $(DOCKER_IMAGE)
-
-release: test
-	git tag $(VERSION)
+publish: test
 	mix hex.publish
-	git push --tags
 
-templates:
-	envsubst < templates/Dockerfile > Dockerfile
-	envsubst < templates/testsuite.yaml > .github/workflows/testsuite.yaml
-
-test: deps
+test: deps services
 	mix format --check-formatted
 	mix dialyzer
 	mix test
 
 distclean: clean
 	rm -rf _build deps mix.lock
+	git ls-files -o | xargs rm -f
 
 clean:
 	rm -f Qm*
 	rm -rf cover
 
-.PHONY: compile docs docker test templates cover
+.PHONY: compile deps docs docker test templates cover

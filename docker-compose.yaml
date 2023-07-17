@@ -1,0 +1,6 @@
+---
+services:
+  myspace-pubsub-daemon:
+    image: docker.io/bahner/myspace-pubsub-daemon
+    ports:
+      - 5002:5002

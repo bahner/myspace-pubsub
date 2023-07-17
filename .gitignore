@@ -26,3 +26,7 @@ erl_crash.dump
 .elixir-ls
 .docker_data
 .scratch
+build
+dialyzer_manifest_25.2.3_elixir-1.14.0_test
+dialyzer_tmp
+tracer_db.manifest

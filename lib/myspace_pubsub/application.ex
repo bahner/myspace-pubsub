@@ -1,10 +1,10 @@
-defmodule ExIpfsPubsub.Application do
+defmodule MyspacePubsub.Application do
   @moduledoc false
   use Application
 
-  @registry :ex_ipfs_pubsub_registry
-  @supervisor ExIpfsPubsub.Supervisor
-  @subscribers ExIpfsPubsub.Subscribers
+  @registry :myspace_pubsub_registry
+  @supervisor MyspacePubsub.Supervisor
+  @subscribers MyspacePubsub.Subscribers
 
   @spec start(any, any) :: {:error, any} | {:ok, pid}
   def start(_type, _args) do
