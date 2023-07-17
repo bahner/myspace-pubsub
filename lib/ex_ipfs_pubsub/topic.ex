@@ -57,7 +57,7 @@ defmodule ExIpfsPubsub.Topic do
     # Update subscribers registry.
     Subscribers.add_topic(state.topic, state.subscribers)
 
-    url = URI.parse("#{@ws_url}/#{topic.base64url_topic}")
+    url = URI.parse("#{@ws_url}/topics/#{topic.base64url_topic}")
 
     ws = Websocket.new!(url)
     state = %__MODULE__{state | ws: ws}
