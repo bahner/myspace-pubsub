@@ -22,7 +22,7 @@ defmodule MyspacePubsub.Supervisor do
   def start_topic(topic) when is_struct(topic) do
     # topic_spec = {MyspacePubsub.Topic, topic}
     topic_spec = %{
-      id: topic.base64url_topic,
+      id: topic.topic,
       start: {MyspacePubsub.Topic, :start_link, [topic]}
     }
 

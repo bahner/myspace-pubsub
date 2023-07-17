@@ -12,11 +12,10 @@ defmodule MyspacePubsub.Topic do
   @ws_url Application.compile_env(:myspace_pubsub, :ws_url, "ws://127.0.0.1:5002/api/v0")
   @registry :myspace_pubsub_registry
 
-  @enforce_keys [:base64url_topic, :handler, :subscribers, :topic]
-  defstruct base64url_topic: nil, handler: nil, subscribers: MapSet.new(), topic: nil, ws: nil
+  @enforce_keys [:handler, :subscribers, :topic]
+  defstruct handler: nil, subscribers: MapSet.new(), topic: nil, ws: nil
 
   @type t :: %__MODULE__{
-          base64url_topic: binary | nil,
           handler: pid | nil,
           subscribers: MapSet.t(pid),
           topic: binary,
@@ -26,7 +25,6 @@ defmodule MyspacePubsub.Topic do
   @spec new!(binary, pid) :: t()
   def new!(topic, subscriber) when is_pid(subscriber) do
     %__MODULE__{
-      base64url_topic: Multibase.encode!(topic, b: "base64url"),
       handler: nil,
       subscribers: MapSet.new([subscriber]),
       topic: topic,
@@ -57,7 +55,7 @@ defmodule MyspacePubsub.Topic do
     # Update subscribers registry.
     Subscribers.add_topic(state.topic, state.subscribers)
 
-    url = URI.parse("#{@ws_url}/topics/#{topic.base64url_topic}")
+    url = URI.parse("#{@ws_url}/topics/#{topic.topic}")
 
     ws = Websocket.new!(url)
     state = %__MODULE__{state | ws: ws}
