@@ -8,7 +8,6 @@ defmodule ExIpfsPubsub do
   @api_url Application.compile_env(:ex_ipfs_pubsub, :api_url, "http://127.0.0.1:5002/api/v0")
 
   plug Tesla.Middleware.BaseUrl, @api_url
-  #plug Tesla.Middleware.Headers, [{"Content-Type", "application/json"}]
   plug Tesla.Middleware.JSON
 
   require Logger
@@ -32,10 +31,6 @@ defmodule ExIpfsPubsub do
 
   @doc """
   Lists the topics that the node is subscribed to.
-
-  ## Usage
-  ls!()
-
   """
   @spec ls!() :: list(binary)
   def ls!() do
@@ -47,8 +42,11 @@ defmodule ExIpfsPubsub do
 
   @doc """
   Checks if a topic exists in the list of topics that the node is subscribed to.
+
+  ## Parameters
+    `topic` - The topic to check for.
   """
-  @spec exists?(any) :: boolean
+  @spec exists?(binary) :: boolean
   def exists?(topic) do
 
     {:ok , topics} = ls()

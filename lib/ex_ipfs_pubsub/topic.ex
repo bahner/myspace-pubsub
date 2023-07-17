@@ -9,7 +9,7 @@ defmodule ExIpfsPubsub.Topic do
   alias ExIpfsPubsub.Subscribers
   alias ExIpfsPubsub.Websocket
 
-  @api_url Application.compile_env(:ex_ipfs_pubsub, :api_url, "ws://127.0.0.1:5002/topic")
+  @ws_url Application.compile_env(:ex_ipfs_pubsub, :ws_url, "ws://127.0.0.1:5002/api/v0")
   @registry :ex_ipfs_pubsub_registry
 
   @enforce_keys [:base64url_topic, :handler, :subscribers, :topic]
@@ -57,7 +57,7 @@ defmodule ExIpfsPubsub.Topic do
     # Update subscribers registry.
     Subscribers.add_topic(state.topic, state.subscribers)
 
-    url = URI.parse("#{@api_url}/#{topic.base64url_topic}")
+    url = URI.parse("#{@ws_url}/#{topic.base64url_topic}")
 
     ws = Websocket.new!(url)
     state = %__MODULE__{state | ws: ws}

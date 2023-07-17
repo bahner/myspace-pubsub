@@ -3,33 +3,27 @@ defmodule ExIpfsPubsub.Message do
 
   require Logger
 
-  @enforce_keys [:from, :data, :seqno, :topic_ids]
-  defstruct from: nil, data: nil, seqno: nil, topic_ids: nil
+  @enforce_keys [:from, :data]
+  defstruct from: nil, data: nil
 
-  # This is the raw format used in IPFS. Not really so interesting.
-  # But users can request it.
   @type t :: %__MODULE__{
           from: binary,
           data: binary,
-          seqno: binary,
-          topic_ids: list
         }
 
   # Sample message:
-  # {"from":"12D3KooWS9Wzyr6CprW7mZUdushaHvSFf2XGvPhtoBonUYabFECo","data":"uSGVpCg","seqno":"uF0CyYs8EKiE","topicIDs":["uYmFobmVy"]
+  # {"from":"12D3KooWS9Wzyr6CprW7mZUdushaHvSFf2XGvPhtoBonUYabFECo","data":"Yo! This should be multiencoded for safe travels."}
 
   @spec new({:error, any}) :: {:error, any}
   def new({:error, data}), do: {:error, data}
 
   @spec new(map) :: t()
   def new(opts) when is_map(opts) do
-    Logger.debug("Creating message form(#{inspect(opts)})")
+    Logger.debug("Creating message from(#{inspect(opts)})")
 
     %__MODULE__{
       from: opts["from"],
       data: opts["data"],
-      seqno: opts["seqno"],
-      topic_ids: opts["TopicIDs"]
     }
   end
 
