@@ -8,3 +8,7 @@ services:
     volumes:
       - .docker_data/ipfs_staging:/export
       - .docker_data/ipfs_data:/data/ipfs
+  myspace-pubsub-daemon:
+    image: docker.io/bahner/myspace-pubsub-daemon
+    ports:
+      - 5002:5002
