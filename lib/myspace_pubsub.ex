@@ -3,13 +3,7 @@ defmodule MyspacePubsub do
   MyspacePubsub is where the Pubsub commands of the IPFS API reside.
   """
   alias MyspacePubsub.Topic
-  use Tesla
-
-  @api_url Application.compile_env(:myspace_pubsub, :api_url, "http://127.0.0.1:5002/api/v0")
-
-  plug(Tesla.Middleware.BaseUrl, @api_url)
-  plug(Tesla.Middleware.JSON)
-
+  alias MyspacePubsub.Api
   require Logger
 
   @doc """
@@ -18,7 +12,7 @@ defmodule MyspacePubsub do
 
   @spec ls() :: {:ok, list(binary)} | {:error, any | :invalid_response}
   def ls() do
-    case get("/topics") do
+    case Api.get("/topics") do
       {:ok, %Tesla.Env{body: body}} when is_map(body) ->
         %{"topics" => topics} = body
         {:ok, topics}
@@ -36,7 +30,7 @@ defmodule MyspacePubsub do
   """
   @spec ls!() :: list(binary)
   def ls!() do
-    {:ok, %Tesla.Env{body: body}} = get("/topics")
+    {:ok, %Tesla.Env{body: body}} = Api.get("/topics")
 
     %{"topics" => topics} = body
     topics
@@ -73,7 +67,9 @@ defmodule MyspacePubsub do
 
   ## Usage
   ```
-  MyspacePubsub.sub(self(), "mytopic")
+  MyspacePubsub.sub("mytopic")
+  MyspacePubsub.sub("mytopic", self()) # Same as above
+  MyspacePubsub.sub("mytopic", pid) # Send messages to a specific process
   ```
 
   Returns {:ok, pid} where pid is the pid of the GenServer that is listening for messages.
@@ -116,18 +112,7 @@ defmodule MyspacePubsub do
   @spec get_pubsub_topic_message :: any
   def get_pubsub_topic_message() do
     receive do
-      {:myspace_pubsub_topic_message, message} -> message
+      {:myspace_pubsub_message, message} -> message
     end
   end
-
-  # @spec decode_strings({:error, any} | map | list) :: {:error, any} | map | list
-  # defp decode_strings({:error, data}), do: {:error, data}
-
-  # defp decode_strings(strings) when is_map(strings) do
-  #   strings = Map.get(strings, "Strings", [])
-  #   decoded_strings = Enum.map(strings, &Multibase.decode!/1)
-  #   %{"Strings" => decoded_strings}
-  # end
-
-  # defp decode_strings(list), do: Enum.map(list, &decode_strings/1)
 end

@@ -1,7 +1,5 @@
 defmodule MyspacePubsub.Websocket do
-  @moduledoc """
-  An websocket client to handle data from the PubSub daemon
-  """
+  @moduledoc false
 
   require Logger
 
