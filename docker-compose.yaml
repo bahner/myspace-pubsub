@@ -1,13 +1,5 @@
 ---
-version: "3"
 services:
-  kubo:
-    image: ipfs/kubo:latest
-    ports:
-      - 5001:5001
-    volumes:
-      - .docker_data/ipfs_staging:/export
-      - .docker_data/ipfs_data:/data/ipfs
   myspace-pubsub-daemon:
     image: docker.io/bahner/myspace-pubsub-daemon
     ports:
