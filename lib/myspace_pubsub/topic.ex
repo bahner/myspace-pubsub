@@ -4,7 +4,6 @@ defmodule MyspacePubsub.Topic do
   use GenServer, restart: :transient
 
   require Logger
-  alias ExIpfs.Multibase
   alias MyspacePubsub.Message
   alias MyspacePubsub.Subscribers
   alias MyspacePubsub.Websocket
@@ -228,7 +227,7 @@ defmodule MyspacePubsub.Topic do
   defp parse_pubsub_message(data) when is_binary(data) do
     case Message.new(data) do
       {:ok, %Message{} = message} ->
-        {:myspace_pubsub_message, Multibase.decode!(message.data)}
+        {:myspace_pubsub_message, message.data}
 
       {:error, _reason} ->
         {:raw_pubsub_message, data}
