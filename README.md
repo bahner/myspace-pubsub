@@ -1,6 +1,7 @@
 # Libp2p pubsub for Elixir
 
 [![Unit and integration tests](https://github.com/bahner/myspace-pubsub/actions/workflows/testsuite.yaml/badge.svg)](https://github.com/bahner/myspace-pubsub/actions/workflows/testsuite.yaml)
+[![Coverage Status](https://coveralls.io/repos/github/bahner/myspace-pubsub/badge.svg?branch=develop)](https://coveralls.io/github/bahner/myspace-pubsub?branch=develop)
 
 This module provides messaging between actors
 somewhere else. It's intended to be used between
