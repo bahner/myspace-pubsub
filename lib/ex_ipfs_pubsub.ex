@@ -79,7 +79,8 @@ defmodule ExIpfsPubsub do
   Returns {:ok, pid} where pid is the pid of the GenServer that is listening for messages.
   Messages will be sent to the provided as a parameter to the function.
   """
-  @spec sub(binary, pid) :: {:ok, pid} | ExIpfs.Api.error_response()
+#  @spec sub(binary, pid) :: {:ok, pid} | {:error, any}
+  @spec sub(binary, pid) :: any
   def sub(topic, pid \\ self()) when is_binary(topic) do
     topic = Topic.new!(topic, pid)
 
@@ -88,11 +89,13 @@ defmodule ExIpfsPubsub do
         Logger.info("Started topic: #{topic.topic}")
         {:ok, pid}
 
-      {:error, {:already_started, handler}} ->
+      {:error, {:already_started, pid}} ->
         Logger.info("Subscribing to topic: #{topic.topic}")
         ExIpfsPubsub.Topic.subscribe(pid, topic.topic)
-        {:ok, handler}
+        {:ok, pid}
     end
+
+    {:error, :invalid_topic}
   end
 
   # FIXME: This is not working yet.
