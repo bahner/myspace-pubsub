@@ -69,6 +69,7 @@ test: deps
 
 distclean: clean
 	rm -rf _build deps mix.lock
+	git ls-files -o | xargs rm -f
 
 clean:
 	rm -f Qm*

@@ -1,14 +1,14 @@
-defmodule ExIpfsPubsub do
+defmodule MyspacePubsub do
   @moduledoc """
-  ExIpfsPubsub is where the Pubsub commands of the IPFS API reside.
+  MyspacePubsub is where the Pubsub commands of the IPFS API reside.
   """
-  alias ExIpfsPubsub.Topic
+  alias MyspacePubsub.Topic
   use Tesla
 
-  @api_url Application.compile_env(:ex_ipfs_pubsub, :api_url, "http://127.0.0.1:5002/api/v0")
+  @api_url Application.compile_env(:myspace_pubsub, :api_url, "http://127.0.0.1:5002/api/v0")
 
-  plug Tesla.Middleware.BaseUrl, @api_url
-  plug Tesla.Middleware.JSON
+  plug(Tesla.Middleware.BaseUrl, @api_url)
+  plug(Tesla.Middleware.JSON)
 
   require Logger
 
@@ -20,10 +20,12 @@ defmodule ExIpfsPubsub do
   def ls() do
     case get("/topics") do
       {:ok, %Tesla.Env{body: body}} when is_map(body) ->
-        %{"topics" =>  topics} = body
+        %{"topics" => topics} = body
         {:ok, topics}
+
       {:ok, _} ->
         {:error, :invalid_response}
+
       {:error, err} ->
         {:error, err}
     end
@@ -36,7 +38,7 @@ defmodule ExIpfsPubsub do
   def ls!() do
     {:ok, %Tesla.Env{body: body}} = get("/topics")
 
-    %{"topics" =>  topics} = body
+    %{"topics" => topics} = body
     topics
   end
 
@@ -48,15 +50,13 @@ defmodule ExIpfsPubsub do
   """
   @spec exists?(binary) :: boolean
   def exists?(topic) do
-
-    {:ok , topics} = ls()
+    {:ok, topics} = ls()
 
     if topic in topics do
       true
     else
       false
     end
-
   end
 
   @doc """
@@ -64,7 +64,7 @@ defmodule ExIpfsPubsub do
 
   https://docs.ipfs.io/reference/http/api/#api-v0-pubsub-sub
 
-  Messages are sent to the process as a tuple of `{:ex_ipfs_pubsub_topic_message, message}`.
+  Messages are sent to the process as a tuple of `{:myspace_pubsub_topic_message, message}`.
   This should make it easy to pattern match on the messages in a receive do loop.
 
   ## Parameters
@@ -73,25 +73,25 @@ defmodule ExIpfsPubsub do
 
   ## Usage
   ```
-  ExIpfsPubsub.sub(self(), "mytopic")
+  MyspacePubsub.sub(self(), "mytopic")
   ```
 
   Returns {:ok, pid} where pid is the pid of the GenServer that is listening for messages.
   Messages will be sent to the provided as a parameter to the function.
   """
-#  @spec sub(binary, pid) :: {:ok, pid} | {:error, any}
+  #  @spec sub(binary, pid) :: {:ok, pid} | {:error, any}
   @spec sub(binary, pid) :: any
   def sub(topic, pid \\ self()) when is_binary(topic) do
     topic = Topic.new!(topic, pid)
 
-    case ExIpfsPubsub.Supervisor.start_topic(topic) do
+    case MyspacePubsub.Supervisor.start_topic(topic) do
       {:ok, pid} ->
         Logger.info("Started topic: #{topic.topic}")
         {:ok, pid}
 
       {:error, {:already_started, pid}} ->
         Logger.info("Subscribing to topic: #{topic.topic}")
-        ExIpfsPubsub.Topic.subscribe(pid, topic.topic)
+        MyspacePubsub.Topic.subscribe(pid, topic.topic)
         {:ok, pid}
     end
 
@@ -102,7 +102,7 @@ defmodule ExIpfsPubsub do
   # @spec publish(binary, binary) :: :ok
   # def publish(topic, message) when is_binary(topic) and is_binary(message) do
   #   Logger.info("Publishing message to topic: #{topic}")
-  #   ExIpfsPubsub.Topic.publish(topic, message)
+  #   MyspacePubsub.Topic.publish(topic, message)
   # end
 
   @doc """
@@ -116,7 +116,7 @@ defmodule ExIpfsPubsub do
   @spec get_pubsub_topic_message :: any
   def get_pubsub_topic_message() do
     receive do
-      {:ex_ipfs_pubsub_topic_message, message} -> message
+      {:myspace_pubsub_topic_message, message} -> message
     end
   end
 

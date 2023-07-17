@@ -1,16 +1,16 @@
-defmodule ExIpfsPubsub.Topic do
+defmodule MyspacePubsub.Topic do
   @moduledoc false
 
   use GenServer, restart: :transient
 
   require Logger
   alias ExIpfs.Multibase
-  alias ExIpfsPubsub.Message
-  alias ExIpfsPubsub.Subscribers
-  alias ExIpfsPubsub.Websocket
+  alias MyspacePubsub.Message
+  alias MyspacePubsub.Subscribers
+  alias MyspacePubsub.Websocket
 
-  @ws_url Application.compile_env(:ex_ipfs_pubsub, :ws_url, "ws://127.0.0.1:5002/api/v0")
-  @registry :ex_ipfs_pubsub_registry
+  @ws_url Application.compile_env(:myspace_pubsub, :ws_url, "ws://127.0.0.1:5002/api/v0")
+  @registry :myspace_pubsub_registry
 
   @enforce_keys [:base64url_topic, :handler, :subscribers, :topic]
   defstruct base64url_topic: nil, handler: nil, subscribers: MapSet.new(), topic: nil, ws: nil
@@ -20,7 +20,7 @@ defmodule ExIpfsPubsub.Topic do
           handler: pid | nil,
           subscribers: MapSet.t(pid),
           topic: binary,
-          ws: ExIpfsPubsub.Websocket.t | nil
+          ws: MyspacePubsub.Websocket.t() | nil
         }
 
   @spec new!(binary, pid) :: t()
@@ -186,26 +186,29 @@ defmodule ExIpfsPubsub.Topic do
   end
 
   def handle_info(
-    {:gun_response, conn_pid, _stream_ref, :nofin, status_code, headers},
-    state
-  ) when conn_pid == state.ws.conn_pid do
+        {:gun_response, conn_pid, _stream_ref, :nofin, status_code, headers},
+        state
+      )
+      when conn_pid == state.ws.conn_pid do
+    Logger.info(
+      "Received :gun_response with status code: #{status_code} and headers: #{inspect(headers)}"
+    )
 
-  Logger.info("Received :gun_response with status code: #{status_code} and headers: #{inspect(headers)}")
+    # You might want to handle different status codes differently.
+    # For example, for a 405 status code (Method Not Allowed), you might want to log an error and terminate the GenServer.
+    # For other status codes, you might want to do something else.
+    case status_code do
+      405 ->
+        Logger.error("Received 405 Method Not Allowed in :gun_response")
+        # {:stop, {:http_error, status_code}, state}
+        {:noreply, state}
 
-  # You might want to handle different status codes differently.
-  # For example, for a 405 status code (Method Not Allowed), you might want to log an error and terminate the GenServer.
-  # For other status codes, you might want to do something else.
-  case status_code do
-    405 ->
-      Logger.error("Received 405 Method Not Allowed in :gun_response")
-      # {:stop, {:http_error, status_code}, state}
-      {:noreply, state}
-
-    _ ->
-      # Handle other status codes if needed.
-      {:noreply, state}
+      _ ->
+        # Handle other status codes if needed.
+        {:noreply, state}
+    end
   end
-end
+
   #     data ->
   #       Logger.info("Received data: #{inspect(data)}")
 
@@ -227,8 +230,9 @@ end
   defp parse_pubsub_message(data) do
     if is_json?(data) do
       message = Message.new(data)
+
       if message.is_a?(Message) do
-        {:ex_ipfs_pubsub_message, Multibase.decode!(message.data)}
+        {:myspace_pubsub_message, Multibase.decode!(message.data)}
       else
         {:raw_pubsub_message, data}
       end

@@ -1,19 +1,19 @@
-defmodule ExIpfsPubsub.Mixfile do
+defmodule MyspacePubsub.Mixfile do
   @moduledoc false
   use Mix.Project
 
   def project do
     [
-      app: :ex_ipfs_pubsub,
+      app: :myspace_pubsub,
       version: "0.0.1",
       elixir: "~> 1.14",
-      name: "Elixir IPFS Pubsub Experiment for Elixir",
+      name: "Libp2p Pubsub for Elixir",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       package: package(),
       description: description(),
       name: "ex_ipfs",
-      source_url: "https://github.com/bahner/ex-ipfs-pubsub.git",
+      source_url: "https://github.com/bahner/myspace-pubsub.git",
       test_coverage: [tool: ExCoveralls],
       preferred_cli_env: [
         coveralls: :test,
@@ -27,7 +27,7 @@ defmodule ExIpfsPubsub.Mixfile do
   def application do
     [
       extra_applications: [:logger],
-      mod: {ExIpfsPubsub.Application, []}
+      mod: {MyspacePubsub.Application, []}
     ]
   end
 
@@ -51,7 +51,7 @@ defmodule ExIpfsPubsub.Mixfile do
       files: ["lib", "mix.exs", "README*", "LICENSE*", "AUTHORS*"],
       maintainers: ["Lars Bahner"],
       licenses: ["GPLv3"],
-      links: %{"GitHub" => "https://github.com/bahner/ex-ipfs-pubsub"}
+      links: %{"GitHub" => "https://github.com/bahner/myspace-pubsub"}
     ]
   end
 end

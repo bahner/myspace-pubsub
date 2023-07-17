@@ -1,4 +1,4 @@
-defmodule ExIpfsPubsub.Message do
+defmodule MyspacePubsub.Message do
   @moduledoc false
 
   require Logger
@@ -8,7 +8,7 @@ defmodule ExIpfsPubsub.Message do
 
   @type t :: %__MODULE__{
           from: binary,
-          data: binary,
+          data: binary
         }
 
   # Sample message:
@@ -23,7 +23,7 @@ defmodule ExIpfsPubsub.Message do
 
     %__MODULE__{
       from: opts["from"],
-      data: opts["data"],
+      data: opts["data"]
     }
   end
 

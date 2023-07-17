@@ -1,10 +1,10 @@
-defmodule ExIpfsPubsub.Supervisor do
+defmodule MyspacePubsub.Supervisor do
   @moduledoc false
 
   use DynamicSupervisor, restart: :transient
 
-  @typep topic :: ExIpfsPubsub.Topic.t()
-  @registry :ex_ipfs_pubsub_registry
+  @typep topic :: MyspacePubsub.Topic.t()
+  @registry :myspace_pubsub_registry
 
   @spec start_link(Init_args) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(init_args) do
@@ -20,10 +20,10 @@ defmodule ExIpfsPubsub.Supervisor do
 
   @spec start_topic(topic) :: DynamicSupervisor.on_start_child()
   def start_topic(topic) when is_struct(topic) do
-    # topic_spec = {ExIpfsPubsub.Topic, topic}
+    # topic_spec = {MyspacePubsub.Topic, topic}
     topic_spec = %{
       id: topic.base64url_topic,
-      start: {ExIpfsPubsub.Topic, :start_link, [topic]}
+      start: {MyspacePubsub.Topic, :start_link, [topic]}
     }
 
     DynamicSupervisor.start_child(__MODULE__, topic_spec)

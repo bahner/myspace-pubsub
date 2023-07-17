@@ -1,4 +1,4 @@
-defmodule ExIpfsPubsubTest do
+defmodule MyspacePubsubTest do
   @moduledoc """
   Test the MyspaceIPFS API
 
@@ -10,7 +10,7 @@ defmodule ExIpfsPubsubTest do
   use ExUnit.Case, async: true
   @timeout 180_000
 
-  import ExIpfsPubsub
+  import MyspacePubsub
   @topic Nanoid.generate()
 
   test "subscribe to a topic" do
@@ -27,7 +27,7 @@ defmodule ExIpfsPubsubTest do
     # Publish and receive a message
     sub(self(), @topic)
     pub("hello", @topic)
-    assert_receive {:ex_ipfs_pubsub_sub_message, "hello"}
+    assert_receive {:myspace_pubsub_sub_message, "hello"}
 
     # Get peers. Probably an empty file.
     {:ok, peerslist} = peers(@topic)

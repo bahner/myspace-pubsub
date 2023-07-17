@@ -1,4 +1,4 @@
-defmodule ExIpfsPubsub.Subscribers do
+defmodule MyspacePubsub.Subscribers do
   @moduledoc false
 
   # This module is a registry for all topics.

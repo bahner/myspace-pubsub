@@ -1,4 +1,4 @@
-defmodule ExIpfsPubsub.Websocket do
+defmodule MyspacePubsub.Websocket do
   @moduledoc """
   An websocket client to handle data from the PubSub daemon
   """
