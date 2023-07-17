@@ -50,11 +50,6 @@ defmodule MyspacePubsub.Mixfile do
 
     This library implements the Myspace Pubsub API for Elixir.
 
-    It does not require ex_ipfs anymore. Instead a websocket connection to a
-    Myspace Pubsub server is established. The server is expected to be running
-    on localhost:5002 by default.
-    A docker-compose file is provided to start the server.
-
     The library is still in an early stage, but it is already usable.
     """
   end
