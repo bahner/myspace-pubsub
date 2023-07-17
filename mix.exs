@@ -7,7 +7,7 @@ defmodule MyspacePubsub.Mixfile do
       app: :myspace_pubsub,
       version: "0.0.2",
       elixir: "~> 1.14",
-      name: "myspace_pubsub",
+      name: "MyspacePubsub",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       package: package(),
