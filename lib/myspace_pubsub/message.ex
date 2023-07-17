@@ -11,37 +11,41 @@ defmodule MyspacePubsub.Message do
           data: binary
         }
 
-  # Sample message:
-  # {"from":"12D3KooWS9Wzyr6CprW7mZUdushaHvSFf2XGvPhtoBonUYabFECo","data":"Yo! This should be multiencoded for safe travels."}
+  @spec new!(binary) :: t()
+  def new!(response) when is_binary(response) do
+    Logger.debug("Pubsub.Message.new!/binary(#{inspect(response)})")
 
-  @spec new({:error, any}) :: {:error, any}
-  def new({:error, data}), do: {:error, data}
+    case new(response) do
+      {:ok, message} -> message
+      {:error, reason} -> raise "Failed to create message: #{reason}"
+    end
+  end
 
-  @spec new(map) :: t()
+  @spec new(binary) :: {:ok, t()} | {:error, any()}
+  def new(response) when is_binary(response) do
+    Logger.debug("Pubsub.Message.new/binary(#{inspect(response)})")
+
+    case Jason.decode(response) do
+      {:ok, data} ->
+        new(data)
+
+      {:error, error} ->
+        {:error, error}
+    end
+  end
+
+  @spec new(map) :: {:ok, t()} | {:error, any()}
   def new(opts) when is_map(opts) do
     Logger.debug("Creating message from(#{inspect(opts)})")
 
-    %__MODULE__{
-      from: opts["from"],
-      data: opts["data"]
-    }
-  end
-
-  @spec new({:ok, map}) :: t()
-  def new({:ok, opts}) when is_map(opts) do
-    Logger.debug("Pubsub.Message.new/map(#{inspect(opts)})")
-    new(opts)
-  end
-
-  @spec new(list) :: list(t())
-  def new(response) when is_list(response) do
-    Logger.debug("Pubsub.Message.new/list(#{inspect(response)})")
-    Enum.map(response, &new/1)
-  end
-
-  @spec new(binary) :: binary()
-  def new(response) when is_binary(response) do
-    Logger.debug("Pubsub.Message.new/binary(#{inspect(response)})")
-    new(Jason.decode!(response))
+    try do
+      {:ok,
+       %__MODULE__{
+         from: opts["from"],
+         data: opts["data"]
+       }}
+    rescue
+      _ -> {:error, "Invalid data for creating a Message"}
+    end
   end
 end

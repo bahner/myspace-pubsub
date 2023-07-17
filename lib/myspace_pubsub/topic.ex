@@ -227,24 +227,13 @@ defmodule MyspacePubsub.Topic do
     {:via, Registry, {@registry, topic}}
   end
 
-  defp parse_pubsub_message(data) do
-    if is_json?(data) do
-      message = Message.new(data)
-
-      if message.is_a?(Message) do
+  defp parse_pubsub_message(data) when is_binary(data) do
+    case Message.new(data) do
+      {:ok, %Message{} = message} ->
         {:myspace_pubsub_message, Multibase.decode!(message.data)}
-      else
-        {:raw_pubsub_message, data}
-      end
-    else
-      {:raw_pubsub_message, data}
-    end
-  end
 
-  defp is_json?(data) do
-    case Jason.decode(data) do
-      {:ok, _} -> true
-      {:error, _} -> false
+      {:error, _reason} ->
+        {:raw_pubsub_message, data}
     end
   end
 end

@@ -6,5 +6,4 @@ defmodule MyspacePubsub.Api do
 
   plug(Tesla.Middleware.BaseUrl, @api_url)
   plug(Tesla.Middleware.JSON)
-
 end

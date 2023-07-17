@@ -115,4 +115,46 @@ defmodule MyspacePubsub do
       {:myspace_pubsub_message, message} -> message
     end
   end
+
+  @doc """
+  Lists the peers that are participating in the given topic.
+
+  ## Parameters
+    `topic` - The topic to list peers for.
+
+  ## Returns
+  A tuple `{:ok, peers}` on success, where peers is a list of peer identifiers.
+  Returns `{:error, reason}` on failure.
+  """
+  @spec peers(binary) :: {:ok, list(binary)} | {:error, any | :invalid_response}
+  def peers(topic) when is_binary(topic) do
+    case Api.get("/topics/" <> topic <> "/peers") do
+      {:ok, %Tesla.Env{body: body}} when is_map(body) ->
+        %{"peers" => peers} = body
+        {:ok, peers}
+
+      {:ok, _} ->
+        {:error, :invalid_response}
+
+      {:error, err} ->
+        {:error, err}
+    end
+  end
+
+  @doc """
+  Lists the peers that are participating in the given topic.
+
+  ## Parameters
+    `topic` - The topic to list peers for.
+
+  ## Returns
+  A list of peer identifiers.
+  """
+  @spec peers!(binary) :: list(binary)
+  def peers!(topic) when is_binary(topic) do
+    {:ok, %Tesla.Env{body: body}} = Api.get("/topics/" <> topic <> "/peers")
+
+    %{"peers" => peers} = body
+    peers
+  end
 end

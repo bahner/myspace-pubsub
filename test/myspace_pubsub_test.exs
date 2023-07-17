@@ -26,8 +26,8 @@ defmodule MyspacePubsubTest do
 
     # Publish and receive a message
     sub(self(), @topic)
-    pub("hello", @topic)
-    assert_receive {:myspace_pubsub_sub_message, "hello"}
+    # pub("hello", @topic)
+    assert_receive {:myspace_pubsub_message, "hello"}
 
     # Get peers. Probably an empty file.
     {:ok, peerslist} = peers(@topic)
